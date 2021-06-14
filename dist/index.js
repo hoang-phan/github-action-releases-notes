@@ -6345,6 +6345,8 @@ const { Octokit } = __nccwpck_require__(757);
 
 const octokit = new Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
 const payload = JSON.stringify(github.context.payload, undefined, 2);
+console.log(payload);
+
 const owner = payload.repository.owner.login;
 const repo = payload.repository.name;
 const pullRequest = payload.pull_request;
@@ -6379,9 +6381,9 @@ async function updateMilestone() {
 }
 
 try {
-  if (pullRequest.merged) {
+  // if (pullRequest.merged) {
     updateMilestone();
-  }
+  // }
 } catch (error) {
   core.setFailed(error.message);
 }
