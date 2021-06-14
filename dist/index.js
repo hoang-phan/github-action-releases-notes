@@ -6341,11 +6341,10 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(20);
 const github = __nccwpck_require__(165);
-const Octokit = __nccwpck_require__(757);
+const { Octokit } = __nccwpck_require__(757);
 
-const octokit = Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
+const octokit = new Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
 const payload = JSON.stringify(payload, undefined, 2);
-const release = payload.release;
 const owner = payload.repository.owner.login;
 const repo = payload.repository.name;
 const pullRequest = payload.pull_request;
