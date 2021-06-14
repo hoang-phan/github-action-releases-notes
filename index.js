@@ -2,6 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const { Octokit } = require("@octokit/rest");
 
+console.log(core.getInput("github-token"));
 const octokit = new Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
 const payload = github.context.payload;
 
@@ -9,7 +10,6 @@ const pullRequest = payload.pull_request;
 const owner = pullRequest.base.repo.owner.login;
 const repo = pullRequest.base.repo.name;
 const milestone = pullRequest.milestone;
-console.log(pullRequest);
 
 const sfWorkRegexp = /^\[[^\]]+\]/;
 const sfLinkRegexp = /https:\/\/scouttalent\.lightning\.force\.com\/[^\s]*/;
