@@ -6350,6 +6350,7 @@ const pullRequest = payload.pull_request;
 const owner = pullRequest.base.repo.owner.login;
 const repo = pullRequest.base.repo.name;
 const milestone = pullRequest.milestone;
+console.log(pullRequest);
 
 const sfWorkRegexp = /^\[[^\]]+\]/;
 const sfLinkRegexp = /https:\/\/scouttalent\.lightning\.force\.com\/[^\s]*/;
