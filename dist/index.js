@@ -6346,6 +6346,9 @@ const { Octokit } = __nccwpck_require__(757);
 const octokit = new Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
 const payload = JSON.stringify(github.context.payload, undefined, 2);
 
+console.log(payload);
+console.log(payload.pull_request);
+
 const pullRequest = payload.pull_request;
 const owner = pullRequest.base.repo.owner.login;
 const repo = pullRequest.base.repo.name;
