@@ -1,15 +1,47 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const Octokit = require("@octokit/rest");
+
+const octokit = Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
+const payload = JSON.stringify(payload, undefined, 2);
+const release = payload.release;
+const owner = payload.repository.owner.login;
+const repo = payload.repository.name;
+const pullRequest = payload.pull_request;
+const milestone = pullRequest.milestone;
+
+const sfWorkRegexp = /^\[[^\]]+\]/;
+const sfLinkRegexp = /https:\/\/scouttalent\.lightning\.force\.com\/[^\s]*/;
+
+async function updateMilestone() {
+  const oldDescription = milestone.description;
+  const prTitle = pullRequest.title;
+  const prDescription = pullRequest.body;
+  const sfWorkId = sfWorkRegexp.exec(prTitle)[0];
+  const title = prTitle.split(sfWorkId)[1].trim();
+  const sfUrl = sfLinkRegexp.exec(prDescription)[0];
+  const newDescription = (oldDescription || "") + "\n- [" + sfWorkId + "](" + sfUrl + ") " + title + " [#" + pullRequest.number + "](" + pullRequest.html_url + ")";
+
+  const resp = await octokit.issues.updateMilestone({
+    owner: owner,
+    repo: repo,
+    milestone_number: milestone.number,
+    description: newDescription
+  });
+
+  if (resp.status === 200) {
+    console.log('Updated Milestone ' + milestone.title + '!');
+  } else {
+    console.error('Failed to Update Milestone ' + milestone.title + '. GitHub API returned Status Code: ' + resp.status);
+    console.error(resp);
+    process.exit(1);
+  }
+}
 
 try {
-  // `who-to-greet` input defined in action metadata file
-  const nameToGreet = core.getInput('who-to-greet');
-  console.log(`Hello ${nameToGreet}!`);
-  const time = (new Date()).toTimeString();
-  core.setOutput("time", time);
-  // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(github.context.payload, undefined, 2)
-  console.log(`The event payload: ${payload}`);
+  if (pullRequest.merged) {
+    updateMilestone();
+  }
 } catch (error) {
   core.setFailed(error.message);
 }

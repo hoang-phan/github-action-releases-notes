@@ -1,23 +1,29 @@
-# Hello world javascript action
+# Github Action Release Notes javascript action
 
-This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+This action appends PR to milestone description
 
 ## Inputs
 
-### `who-to-greet`
+### `github-token`
 
-**Required** The name of the person to greet. Default `"World"`.
+**Required** Token to use Github API.
 
-## Outputs
-
-### `time`
-
-The time we greeted you.
 
 ## Example usage
 
 ```
-uses: actions/github-action-releases-notes@v1.0
-with:
-  who-to-greet: 'Mona the Octocat'
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    name: A job to Update milestone with Release Notes
+    steps:
+      - name: Update milestone
+        id: hello
+        uses: hoang-phan/github-action-releases-notes@v1.2
+        with:
+          github-token: 'your-gh-token'
 ```

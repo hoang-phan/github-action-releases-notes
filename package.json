@@ -19,6 +19,7 @@
   "homepage": "https://github.com/hoang-phan/github-action-releases-notes#readme",
   "dependencies": {
     "@actions/core": "^1.4.0",
-    "@actions/github": "^5.0.0"
+    "@actions/github": "^5.0.0",
+    "@octokit/rest": "^18.6.0"
   }
 }

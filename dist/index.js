@@ -2290,6 +2290,44 @@ exports.paginatingEndpoints = paginatingEndpoints;
 
 /***/ }),
 
+/***/ 388:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+const VERSION = "1.0.4";
+
+/**
+ * @param octokit Octokit instance
+ * @param options Options passed to Octokit constructor
+ */
+
+function requestLog(octokit) {
+  octokit.hook.wrap("request", (request, options) => {
+    octokit.log.debug("request", options);
+    const start = Date.now();
+    const requestOptions = octokit.request.endpoint.parse(options);
+    const path = requestOptions.url.replace(options.baseUrl, "");
+    return request(options).then(response => {
+      octokit.log.info(`${requestOptions.method} ${path} - ${response.status} in ${Date.now() - start}ms`);
+      return response;
+    }).catch(error => {
+      octokit.log.info(`${requestOptions.method} ${path} - ${error.status} in ${Date.now() - start}ms`);
+      throw error;
+    });
+  });
+}
+requestLog.VERSION = VERSION;
+
+exports.requestLog = requestLog;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
 /***/ 379:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -3817,6 +3855,31 @@ const request = withDefaults(endpoint.endpoint, {
 });
 
 exports.request = request;
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
+/***/ 757:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+var core = __nccwpck_require__(730);
+var pluginRequestLog = __nccwpck_require__(388);
+var pluginPaginateRest = __nccwpck_require__(563);
+var pluginRestEndpointMethods = __nccwpck_require__(379);
+
+const VERSION = "18.6.0";
+
+const Octokit = core.Octokit.plugin(pluginRequestLog.requestLog, pluginRestEndpointMethods.legacyRestEndpointMethods, pluginPaginateRest.paginateRest).defaults({
+  userAgent: `octokit-rest.js/${VERSION}`
+});
+
+exports.Octokit = Octokit;
 //# sourceMappingURL=index.js.map
 
 
@@ -6278,16 +6341,48 @@ var __webpack_exports__ = {};
 (() => {
 const core = __nccwpck_require__(20);
 const github = __nccwpck_require__(165);
+const Octokit = __nccwpck_require__(757);
+
+const octokit = Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
+const payload = JSON.stringify(payload, undefined, 2);
+const release = payload.release;
+const owner = payload.repository.owner.login;
+const repo = payload.repository.name;
+const pullRequest = payload.pull_request;
+const milestone = pullRequest.milestone;
+
+const sfWorkRegexp = /^\[[^\]]+\]/;
+const sfLinkRegexp = /https:\/\/scouttalent\.lightning\.force\.com\/[^\s]*/;
+
+async function updateMilestone() {
+  const oldDescription = milestone.description;
+  const prTitle = pullRequest.title;
+  const prDescription = pullRequest.body;
+  const sfWorkId = sfWorkRegexp.exec(prTitle)[0];
+  const title = prTitle.split(sfWorkId)[1].trim();
+  const sfUrl = sfLinkRegexp.exec(prDescription)[0];
+  const newDescription = (oldDescription || "") + "\n- [" + sfWorkId + "](" + sfUrl + ") " + title + " [#" + pullRequest.number + "](" + pullRequest.html_url + ")";
+
+  const resp = await octokit.issues.updateMilestone({
+    owner: owner,
+    repo: repo,
+    milestone_number: milestone.number,
+    description: newDescription
+  });
+
+  if (resp.status === 200) {
+    console.log('Updated Milestone ' + milestone.title + '!');
+  } else {
+    console.error('Failed to Update Milestone ' + milestone.title + '. GitHub API returned Status Code: ' + resp.status);
+    console.error(resp);
+    process.exit(1);
+  }
+}
 
 try {
-  // `who-to-greet` input defined in action metadata file
-  const nameToGreet = core.getInput('who-to-greet');
-  console.log(`Hello ${nameToGreet}!`);
-  const time = (new Date()).toTimeString();
-  core.setOutput("time", time);
-  // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(github.context.payload, undefined, 2)
-  console.log(`The event payload: ${payload}`);
+  if (pullRequest.merged) {
+    updateMilestone();
+  }
 } catch (error) {
   core.setFailed(error.message);
 }
