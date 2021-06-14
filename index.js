@@ -3,7 +3,7 @@ const github = require('@actions/github');
 const { Octokit } = require("@octokit/rest");
 
 const octokit = new Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
-const payload = JSON.stringify(payload, undefined, 2);
+const payload = JSON.stringify(github.context.payload, undefined, 2);
 const owner = payload.repository.owner.login;
 const repo = payload.repository.name;
 const pullRequest = payload.pull_request;
