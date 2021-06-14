@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Update milestone
         id: hello
-        uses: hoang-phan/github-action-releases-notes@v1.7
+        uses: hoang-phan/github-action-releases-notes@v1.8
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
