@@ -1,10 +1,9 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const Octokit = require("@octokit/rest");
+const { Octokit } = require("@octokit/rest");
 
-const octokit = Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
+const octokit = new Octokit({ auth: core.getInput("github-token"), baseUrl: 'https://api.github.com' });
 const payload = JSON.stringify(payload, undefined, 2);
-const release = payload.release;
 const owner = payload.repository.owner.login;
 const repo = payload.repository.name;
 const pullRequest = payload.pull_request;
