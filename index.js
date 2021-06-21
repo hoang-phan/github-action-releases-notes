@@ -15,16 +15,16 @@ function escapeRegExp(string) {
 }
 
 const workRegexp = /^\[[^\]]+\]/;
-const workUrlRegexp = new RegExp(escapeRegExp(core.getInput("work-tracker-base")) + "/[^\\s]*");
+const workUrlRegexp = new RegExp(escapeRegExp(core.getInput("work-tracker-host")) + "/[^\\s]*");
 
 async function updateMilestone() {
   const oldDescription = milestone.description;
   const prTitle = pullRequest.title;
   const prDescription = pullRequest.body;
-  const sfWorkId = workRegexp.exec(prTitle)[0];
-  const title = prTitle.split(sfWorkId)[1].trim();
-  const sfUrl = workUrlRegexp.exec(prDescription)[0];
-  const newDescription = (oldDescription || "") + "\n- [" + sfWorkId + "](" + sfUrl + ") " + title + " [#" + pullRequest.number + "](" + pullRequest.html_url + ")";
+  const workId = workRegexp.exec(prTitle)[0];
+  const title = prTitle.split(workId)[1].trim();
+  const workUrl = workUrlRegexp.exec(prDescription)[0];
+  const newDescription = (oldDescription || "") + "\n- [" + workId + "](" + workUrl + ") " + title + " [#" + pullRequest.number + "](" + pullRequest.html_url + ")";
 
   const resp = await octokit.issues.updateMilestone({
     owner: owner,

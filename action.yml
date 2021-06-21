@@ -5,6 +5,10 @@ inputs:
     description: 'Github token'
     required: true
     default: 'missing'
+  work-tracker-host:  # id of input
+    description: 'Work tracker host'
+    required: true
+    default: 'missing'
 outputs:
   time: # id of output
     description: 'The time we greeted you'
