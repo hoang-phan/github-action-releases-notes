@@ -6351,16 +6351,20 @@ const owner = pullRequest.base.repo.owner.login;
 const repo = pullRequest.base.repo.name;
 const milestone = pullRequest.milestone;
 
-const sfWorkRegexp = /^\[[^\]]+\]/;
-const sfLinkRegexp = /https:\/\/scouttalent\.lightning\.force\.com\/[^\s]*/;
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const workRegexp = /^\[[^\]]+\]/;
+const workUrlRegexp = new Regexp(escapeRegExp(core.getInput("work-tracker-base")) + "/[^\\s]*");
 
 async function updateMilestone() {
   const oldDescription = milestone.description;
   const prTitle = pullRequest.title;
   const prDescription = pullRequest.body;
-  const sfWorkId = sfWorkRegexp.exec(prTitle)[0];
+  const sfWorkId = workRegexp.exec(prTitle)[0];
   const title = prTitle.split(sfWorkId)[1].trim();
-  const sfUrl = sfLinkRegexp.exec(prDescription)[0];
+  const sfUrl = workUrlRegexp.exec(prDescription)[0];
   const newDescription = (oldDescription || "") + "\n- [" + sfWorkId + "](" + sfUrl + ") " + title + " [#" + pullRequest.number + "](" + pullRequest.html_url + ")";
 
   const resp = await octokit.issues.updateMilestone({

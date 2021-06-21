@@ -23,7 +23,8 @@ jobs:
     steps:
       - name: Update milestone
         id: hello
-        uses: hoang-phan/github-action-releases-notes@v1.8
+        uses: hoang-phan/github-action-releases-notes@v2.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          work-tracker-host: "https://your-work-tracker.com"
 ```
