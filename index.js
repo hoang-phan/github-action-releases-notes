@@ -15,7 +15,7 @@ function escapeRegExp(string) {
 }
 
 const workRegexp = /^\[[^\]]+\]/;
-const workUrlRegexp = new Regexp(escapeRegExp(core.getInput("work-tracker-base")) + "/[^\\s]*");
+const workUrlRegexp = new RegExp(escapeRegExp(core.getInput("work-tracker-base")) + "/[^\\s]*");
 
 async function updateMilestone() {
   const oldDescription = milestone.description;
